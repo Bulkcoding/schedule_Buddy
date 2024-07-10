@@ -48,6 +48,7 @@ namespace schedule_Project
 
         }
 
+        // gridview에 조회한 테이블 넣기
         private void ShowSchedule_Grid()
         {
             try
@@ -99,6 +100,7 @@ namespace schedule_Project
             }
         }
 
+        // 셀을 클릭하면 해당하는 행의 정보들을 밑에 텍스트박스에 넣어주기
         private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0 && e.RowIndex < dataGridView1.Rows.Count - 1) // 비어있는 행을 클릭하면 '행이 없습니다' 에러 방지
@@ -125,6 +127,7 @@ namespace schedule_Project
             }
         }
 
+        // 삭제 메소드
         private void btnDelete_Click(object sender, EventArgs e)
         {
             try
@@ -155,7 +158,7 @@ namespace schedule_Project
             }
         }
 
-
+        // 텍스트박스 비우기
         private void clear()
         {
             ShowSchedule_Grid();
@@ -169,6 +172,7 @@ namespace schedule_Project
             checkAlram.Checked = false;
         }
 
+        // 수정 메소드
         private void btnUpdate_Click(object sender, EventArgs e)
         {
             int alram_yn = checkAlram.Checked ? 1 : 0;
@@ -262,6 +266,7 @@ namespace schedule_Project
             }
         }
 
+        // 숫자, :, ctrl c,v 만 허용하는 기능
         private void txtAlramTime_KeyPress(object sender, KeyPressEventArgs e)
         {
             // 누른 키가 숫자가 아닌지 확인 ( ':', ctrl + c,v는 허용)
@@ -273,6 +278,7 @@ namespace schedule_Project
 
         }
 
+        // 필수 정보가 비어있는지 확인
         private bool checkEmpty()
         {
             if(txtStartDate.Text.Equals("") || txtEndDate.Text.Equals(""))

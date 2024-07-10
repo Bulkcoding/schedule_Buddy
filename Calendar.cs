@@ -28,11 +28,15 @@ namespace schedule_Project
         OracleConnection conn;
         string connectionString = ConfigurationManager.ConnectionStrings["OracleDBConnection"].ConnectionString;
 
-        int time = 0;
-
-
         //타이머
         private System.Windows.Forms.Timer timer;
+        private Timer resetTimer;
+
+
+        // 인스턴스
+        int time = 0;
+        string hours;
+        string minutes;
 
         public Calendar(string userid_Loginuser, string username_Loginuser)
         {
@@ -77,7 +81,8 @@ namespace schedule_Project
         }
 
         // 캘린더에 일정선택시 텍스트박스에 입력됨
-        private void monthCalendar_DateChanged(object sender, DateRangeEventArgs e) {
+        private void monthCalendar_DateChanged(object sender, DateRangeEventArgs e)
+        {
 
             if (monthCalendar.SelectionRange.Start == monthCalendar.SelectionRange.End)
             {
@@ -90,7 +95,8 @@ namespace schedule_Project
         }
 
         //timepicker에 시간선택하면 시간에 들어간다.
-        private void dateTimePicker_ValueChanged(object sender, EventArgs e) {
+        private void dateTimePicker_ValueChanged(object sender, EventArgs e)
+        {
             if (txtTimeSet.Enabled)
             {
                 txtTimeSet.Text = dateTimePicker.Value.ToString("tt hh:mm");
@@ -121,8 +127,8 @@ namespace schedule_Project
             string str_timeSet = txtTimeSet.Text;                                                   // 오전 11:23
             string[] array_timeSet = str_timeSet.Split(' ');                                        // ["오전", "11:23"]
             string str_content = txtContent.Text;                                                   // "일어나기"
-            
-            
+
+
             // 알림 추가여부 확인
             if (checkBoxAlram.Checked)
             {
@@ -151,7 +157,7 @@ namespace schedule_Project
                     {
                         str_timeSet = array_timeSet[1];                     //  오후 12:30 -> 12:30 이다.
                     }
-                                       
+
                 }
                 else
                 {
@@ -164,7 +170,7 @@ namespace schedule_Project
                     {
                         str_timeSet = array_timeSet[1];
                     }
-                        
+
                 }
             }
             else                           // 체크 한 뒤 시간을 선택하세요. 가 insert 되는 것을 방지.
@@ -173,7 +179,7 @@ namespace schedule_Project
             }
 
             //내 아이디와 이름 가져오기
-            
+
 
 
             // DB에 INSERT 하기
@@ -214,7 +220,7 @@ namespace schedule_Project
                     cmd.Parameters.Add(paramAlram_time);
                     cmd.Parameters.Add(paramAlram_status);
                     cmd.Parameters.Add(paramSchedule_content);
-                    
+
                     conn.Open();
 
                     cmd.ExecuteNonQuery();
@@ -235,55 +241,61 @@ namespace schedule_Project
         {
             labelNowTime.Text = DateTime.Now.ToString();        // 현재시간
 
+            //checkMidnight();                                    // 자정인지 체크하는 메소드로 이동
+
             // db에 저장되어 있고 알림status가 1이고, 아직 지나지 않은 시간이면
             using (conn = new OracleConnection(connectionString)) // using이 끝나면 close를 자동으로 해준다.
             {
-                conn.Open();
+               // conn.Open();
 
-                string sql = " WITH Schedule_CTE AS ( "+
-                             "  SELECT "+
-                             "      CASE "+
-                             "          WHEN TO_CHAR(SYSDATE, 'YY/MM/DD HH24:MI') < TO_CHAR(TO_DATE(alram_start_date || alram_time, 'YY/MM/DD HH24:MI'), 'YY/MM/DD HH24:MI') THEN 'CASE1' "+
-                             "          WHEN TO_CHAR(SYSDATE, 'YY/MM/DD HH24:MI') BETWEEN TO_CHAR(TO_DATE(alram_start_date || alram_time, 'YY/MM/DD HH24:MI'), 'YY/MM/DD HH24:MI') AND TO_CHAR(TO_DATE(alram_end_date || alram_time, 'YY/MM/DD HH24:MI'), 'YY/MM/DD HH24:MI') THEN 'CASE2' "+
-                             "          ELSE 'CASE3' "+
-                             "      END AS result_case, "+
-                             "      TO_CHAR(SYSDATE, 'YY/MM/DD HH24:MI') AS nowtime, "+
-                             "      TO_CHAR(TO_DATE(alram_start_date || alram_time, 'YY/MM/DD HH24:MI'), 'YY/MM/DD HH24:MI') AS statime, "+
-                             "      TO_CHAR(TO_DATE(alram_end_date || alram_time, 'YY/MM/DD HH24:MI'), 'YY/MM/DD HH24:MI') AS endtime, "+
-                             "      alram_time, alram_start_date, schedule_content "+
-                             "  FROM tbl_Schedule "+
-                             "  WHERE fk_userid= :fk_userid AND alram_status = 1 AND alram_time IS NOT NULL " +
-                             " ), "+
-                             " Minutes_Diff_CTE AS ( "+
-                             "   SELECT "+
-                             "       CASE "+
-                             "          WHEN result_case = 'CASE1' THEN "+
-                             "             CASE "+ 
-                             "                WHEN alram_time > TO_CHAR(SYSDATE, 'HH24:MI') THEN "+
-                             "                   (TO_NUMBER(TO_DATE(alram_time, 'HH24:MI') - TO_DATE(TO_CHAR(SYSDATE, 'HH24:MI'), 'HH24:MI')) * 24 * 60) + (TO_NUMBER(TO_DATE(alram_start_date) - TO_DATE(TO_CHAR(SYSDATE, 'YY/MM/DD'))) * 24 * 60) "+
+                string sql = " WITH Schedule_CTE AS ( " +
+                             "  SELECT " +
+                             "      CASE " +
+                             "          WHEN TO_CHAR(SYSDATE, 'HH24:MI') = TO_CHAR(TO_DATE(alram_start_date || alram_time, 'YY/MM/DD HH24:MI'), 'HH24:MI') THEN 'CASE4' " +
+                             "          WHEN TO_CHAR(SYSDATE, 'YY/MM/DD HH24:MI') < TO_CHAR(TO_DATE(alram_start_date || alram_time, 'YY/MM/DD HH24:MI'), 'YY/MM/DD HH24:MI') THEN 'CASE1' " +
+                             "          WHEN TO_CHAR(SYSDATE, 'YY/MM/DD HH24:MI') BETWEEN TO_CHAR(TO_DATE(alram_start_date || alram_time, 'YY/MM/DD HH24:MI'), 'YY/MM/DD HH24:MI') AND TO_CHAR(TO_DATE(alram_end_date || alram_time, 'YY/MM/DD HH24:MI'), 'YY/MM/DD HH24:MI') THEN 'CASE2' " +
+                             "          ELSE 'CASE3' " +
+                             "      END AS result_case, " +
+                             "      TO_CHAR(SYSDATE, 'YY/MM/DD HH24:MI') AS nowtime, " +
+                             "      TO_CHAR(TO_DATE(alram_start_date || alram_time, 'YY/MM/DD HH24:MI'), 'YY/MM/DD HH24:MI') AS statime, " +
+                             "      TO_CHAR(TO_DATE(alram_end_date || alram_time, 'YY/MM/DD HH24:MI'), 'YY/MM/DD HH24:MI') AS endtime, " +
+                             "      alram_time, alram_start_date, schedule_content, seq " +
+                             "  FROM tbl_Schedule " +
+                             "  WHERE fk_userid= :fk_userid AND alram_status = 1 AND alram_time IS NOT NULL AND check_status is null " +
+                             " ), " +
+                             " Minutes_Diff_CTE AS ( " +
+                             "   SELECT " +
+                             "       CASE " +
+                             "          WHEN result_case = 'CASE4' THEN 0 " +
+                             "          WHEN result_case = 'CASE1' THEN " +
+                             "             CASE " +
+                             "                WHEN alram_time > TO_CHAR(SYSDATE, 'HH24:MI') THEN " +
+                             "                   (TO_NUMBER(TO_DATE(alram_time, 'HH24:MI') - TO_DATE(TO_CHAR(SYSDATE, 'HH24:MI'), 'HH24:MI')) * 24 * 60) + (TO_NUMBER(TO_DATE(alram_start_date) - TO_DATE(TO_CHAR(SYSDATE, 'YY/MM/DD'))) * 24 * 60) " +
                              "               ELSE " +
                              "                   TO_NUMBER(TO_DATE(alram_time, 'HH24:MI') - TO_DATE(TO_CHAR(SYSDATE, 'HH24:MI'), 'HH24:MI')) * 24 * 60 + (TO_NUMBER(TO_DATE(alram_start_date) - TO_DATE(TO_CHAR(SYSDATE, 'YY/MM/DD'))) * 24 * 60) " +
                              "          END " +
-                             "     ELSE "+
-                             "        CASE "+
-                             "           WHEN alram_time > TO_CHAR(SYSDATE, 'HH24:MI') THEN "+
+                             "     ELSE " +
+                             "        CASE " +
+                             "           WHEN alram_time > TO_CHAR(SYSDATE, 'HH24:MI') THEN " +
                              "              TO_NUMBER(TO_DATE(alram_time, 'HH24:MI') - TO_DATE(TO_CHAR(SYSDATE, 'HH24:MI'), 'HH24:MI')) * 24 * 60 " +
-                             "         ELSE "+
-                             "            (24 * 60) + TO_NUMBER(TO_DATE(alram_time, 'HH24:MI') - TO_DATE(TO_CHAR(SYSDATE, 'HH24:MI'), 'HH24:MI')) * 24 * 60 "+
-                             "   END "+
-                             "  END AS minutes_diff, nowtime, statime, endtime, alram_time, result_case, schedule_content "+
-                             "  FROM Schedule_CTE "+
-                             "  WHERE result_case IN ('CASE1', 'CASE2') "+
-                             " ) "+
-                             " SELECT "+
-                             "    FLOOR(minutes_diff / 60) AS hours, "+
-                             "    trunc(MOD(minutes_diff, 60)) AS minutes, schedule_content "+
-                             " FROM Minutes_Diff_CTE "+
-                             " ORDER BY FLOOR(minutes_diff / 60), trunc(MOD(minutes_diff, 60)) ";
+                             "         ELSE " +
+                             "            (24 * 60) + TO_NUMBER(TO_DATE(alram_time, 'HH24:MI') - TO_DATE(TO_CHAR(SYSDATE, 'HH24:MI'), 'HH24:MI')) * 24 * 60 " +
+                             "   END " +
+                             "  END AS minutes_diff, nowtime, statime, endtime, alram_time, result_case, schedule_content, seq " +
+                             "  FROM Schedule_CTE " +
+                             "  WHERE result_case IN ('CASE1', 'CASE2', 'CASE4') " +
+                             " ) " +
+                             " SELECT " +
+                             "    trunc(minutes_diff / 60) AS hours, " +
+                             "    round(MOD(minutes_diff, 60)) AS minutes, schedule_content, seq " +
+                             " FROM Minutes_Diff_CTE " +
+                             " ORDER BY trunc(minutes_diff / 60), round(MOD(minutes_diff, 60)) ";
 
                 OracleCommand cmd = new OracleCommand(sql, conn);
                 OracleParameter paramFkUserid = new OracleParameter(":fk_userid", OracleDbType.Varchar2, 20);
                 paramFkUserid.Value = txtHiddenId.Text;
+
+                conn.Open();
 
                 cmd.Parameters.Add(paramFkUserid);
 
@@ -294,14 +306,21 @@ namespace schedule_Project
                 // 첫 번째 행 값 가져오기
                 if (dt.Rows.Count > 0)
                 {
-                    string hours = dt.Rows[0]["hours"].ToString();
-                    string minutes = dt.Rows[0]["minutes"].ToString();
+                    hours = dt.Rows[0]["hours"].ToString();
+                    minutes = dt.Rows[0]["minutes"].ToString();
+
                     labelLeftTime.Text = "알람까지 " + hours + " 시간 " + minutes + " 분 남았습니다.";
 
-                    if(hours.Equals("0") && minutes.Equals("0"))
+                    textBox1.Text = dt.Rows[0]["seq"].ToString();
+
+                    if (hours.Equals("0") && minutes.Equals("0"))
                     {
                         // MessageBox.Show("알람이 울립니다."); 이거 1초마다 계속 뜸. 1분 정도 지나야 db에서 사라져서 이 부분은 좀 더 생각해야할듯
                         // 진짜 알람처럼 계속 울리는데 한번끄면 아에 꺼지는 식으로 tick 함수를 1분정도 멈춰둬야하나?
+
+                        MessageBox.Show("머ㅗ임");
+                        AlramEvent();           // 알람이 울리는 메소드 호출
+
                     }
                 }
                 else
@@ -324,14 +343,129 @@ namespace schedule_Project
             //if time <= 0
             //time = 0;
             //MessageBox.Show("알람이 울립니다.");
- 
+
         }
 
+        // 남은시간이 00:00이고, status가 0일때, 알람이 울리는 메소드
+        private void AlramEvent()
+        {
+            if (!StatusIsOne())      // status가 1이면 실행하지 않는다.
+            {
+                ShowMessageBox();
+            }
+        }
+
+        // status가 1인지 확인
+        private bool StatusIsOne()
+        {
+            using (conn = new OracleConnection(connectionString))
+            {
+                conn.Open();
+
+                string sql = "SELECT check_status FROM TBL_SCHEDULE WHERE seq = :seq";
+
+                OracleCommand cmd = new OracleCommand(sql, conn);
+                OracleParameter paramSeq = new OracleParameter(":seq", OracleDbType.Int32);
+                paramSeq.Value = textBox1.Text;
+
+                cmd.Parameters.Add(paramSeq);
+
+                DataTable dt = new DataTable();
+                OracleDataAdapter adapter = new OracleDataAdapter(cmd);
+                adapter.Fill(dt); // SQL 문장을 실행하고, 결과 데이터를 dt에 채움.
+
+                string status = dt.Rows[0][0].ToString();
+
+                return status.Equals("1");
+            }
+        }
+
+
+        // 알람 확인 후 status를 1로 바꿔주는 메소드
+        private void UpdateCheckStatus()
+        {
+            using (conn = new OracleConnection(connectionString))
+            {
+                conn.Open();
+
+                string sql = "UPDATE TBL_SCHEDULE SET check_status = 1 WHERE seq = :seq";
+
+                OracleCommand cmd = new OracleCommand(sql, conn);
+                OracleParameter paramSeq = new OracleParameter(":seq", OracleDbType.Int32);
+                paramSeq.Value = textBox1.Text;
+
+                cmd.Parameters.Add(paramSeq);
+
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        // 알람이 울린지 1분이 지나면 status를 null로 바꿔주는 메소드
+        private void ResetCheckStatus()
+        {
+            using (conn = new OracleConnection(connectionString))
+            {
+                conn.Open();
+
+                string sql = "UPDATE TBL_SCHEDULE SET check_status = null WHERE seq = :seq";
+
+                OracleCommand cmd = new OracleCommand(sql, conn);
+                OracleParameter paramSeq = new OracleParameter(":seq", OracleDbType.Int32);
+                paramSeq.Value = textBox1.Text;
+
+                cmd.Parameters.Add(paramSeq);
+
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        // 알람 메세지 출력.  확인을 누르면 status가 1로 바뀐다.
+        private void ShowMessageBox()
+        {
+            DialogResult result = MessageBox.Show("알람 메시지", "알람", MessageBoxButtons.OKCancel);
+            if (result == DialogResult.OK || result == DialogResult.Cancel)
+            {
+                UpdateCheckStatus();
+
+                timerOneMinuteStart();
+            }
+        }
+
+
+        // 알람이 울린지 1분이 지나면 status를 null로 돌려주는 메소드를 호출하는 메소드
+        private void timerOneMinuteStart()
+        {
+            Timer timer = new Timer();
+            timer.Interval = 60000;
+            timer.Tick += (sender, e) =>
+            {
+                timer.Stop();
+                ResetCheckStatus();
+                timer.Dispose();
+            };
+            timer.Start();
+        }
+
+
+        // 하루가 지나는 시점에 status null로 넣기
+        /*private void checkMidnight()
+        {
+            DateTime now = DateTime.Now;                // 2024-07-08 15:32
+            DateTime midnight = now.Date.AddDays(1);    // 2024-07-09 00:00
+
+            if (now.Hour == 0 && now.Minute == 0 && now.Second < 60)
+            {
+                ResetCheckStatus();
+            }
+        }*/
+
+
+        // 조회창 열기
         private void BtnGoSearchSchedule_Click(object sender, EventArgs e)
         {
             SearchSchedule searchSchedule = new SearchSchedule(userId, userName);
 
-            if(searchSchedule.ShowDialog() == DialogResult.OK)
+            if (searchSchedule.ShowDialog() == DialogResult.OK)
             {
                 /*// 자식 창에서 데이터를 가져옵니다.
                 string result1 = calendar.Result1;
@@ -345,6 +479,7 @@ namespace schedule_Project
         }
 
 
+        // 텍스트박스 원상태로 돌리기
         private void clear()
         {
             checkBoxAlram.Checked = false;

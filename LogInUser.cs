@@ -58,32 +58,6 @@ namespace schedule_Project
             }
         }
 
-        private void Btn_searchUser_Click(object sender, EventArgs e)
-        {
-
-            try
-            {
-                using (conn = new OracleConnection(connectionString)) // using이 끝나면 close를 자동으로 해준다.
-                {
-                    conn.Open();
-
-                    string sql = "SELECT * FROM tbl_User";
-
-                    OracleDataAdapter ad = new OracleDataAdapter(sql, conn); // ad는 c#과 데이터베이스간의 다리역할
-
-                    DataSet ds = new DataSet(); // 데이터베이스에서 검색된 데이터를 저장하는 컨테이너
-                    ad.Fill(ds, "tbl_User"); // ds의 객체에 채운다.
-                                             // (ds는 데이터를 채울 대상, DataSet 내에 생성될 새로운 테이블이름.임의로 해도 괜찮으나 보통 db테이블 이름과 동일하게 설정)
-
-                    dataGridView1.DataSource = ds.Tables[0];
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error: {ex.Message}");
-            }
-        }
-
         private void button_loigin_Click(object sender, EventArgs e)
         {
             string userId = textBox_id.Text.Trim();

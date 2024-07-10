@@ -34,10 +34,7 @@
             this.textBox_pw = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.button_loigin = new System.Windows.Forms.Button();
-            this.Btn_searchUser = new System.Windows.Forms.Button();
-            this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.btnAddUser = new System.Windows.Forms.Button();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
             // textBox_id
@@ -99,26 +96,6 @@
             this.button_loigin.UseVisualStyleBackColor = true;
             this.button_loigin.Click += new System.EventHandler(this.button_loigin_Click);
             // 
-            // Btn_searchUser
-            // 
-            this.Btn_searchUser.Location = new System.Drawing.Point(749, 329);
-            this.Btn_searchUser.Name = "Btn_searchUser";
-            this.Btn_searchUser.Size = new System.Drawing.Size(85, 32);
-            this.Btn_searchUser.TabIndex = 4;
-            this.Btn_searchUser.Text = "조회하기";
-            this.Btn_searchUser.UseVisualStyleBackColor = true;
-            this.Btn_searchUser.Click += new System.EventHandler(this.Btn_searchUser_Click);
-            // 
-            // dataGridView1
-            // 
-            this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView1.Location = new System.Drawing.Point(540, 94);
-            this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.RowHeadersWidth = 51;
-            this.dataGridView1.RowTemplate.Height = 27;
-            this.dataGridView1.Size = new System.Drawing.Size(495, 213);
-            this.dataGridView1.TabIndex = 5;
-            // 
             // btnAddUser
             // 
             this.btnAddUser.Location = new System.Drawing.Point(307, 319);
@@ -132,10 +109,8 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1047, 450);
+            this.ClientSize = new System.Drawing.Size(516, 450);
             this.Controls.Add(this.btnAddUser);
-            this.Controls.Add(this.dataGridView1);
-            this.Controls.Add(this.Btn_searchUser);
             this.Controls.Add(this.button_loigin);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
@@ -145,7 +120,6 @@
             this.Name = "LogInUser";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Form1";
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -158,8 +132,6 @@
         private System.Windows.Forms.TextBox textBox_pw;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button button_loigin;
-        private System.Windows.Forms.Button Btn_searchUser;
-        private System.Windows.Forms.DataGridView dataGridView1;
         private System.Windows.Forms.Button btnAddUser;
     }
 }

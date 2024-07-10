@@ -51,6 +51,7 @@
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.labelLeftTime = new System.Windows.Forms.Label();
             this.BtnGoSearchSchedule = new System.Windows.Forms.Button();
+            this.textBox1 = new System.Windows.Forms.TextBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.SuspendLayout();
@@ -199,7 +200,7 @@
             // Timer
             // 
             this.Timer.Enabled = true;
-            this.Timer.Interval = 1000;
+            this.Timer.Interval = 5000;
             this.Timer.Tick += new System.EventHandler(this.Timer_Tick);
             // 
             // groupBox1
@@ -251,11 +252,19 @@
             this.BtnGoSearchSchedule.UseVisualStyleBackColor = true;
             this.BtnGoSearchSchedule.Click += new System.EventHandler(this.BtnGoSearchSchedule_Click);
             // 
+            // textBox1
+            // 
+            this.textBox1.Location = new System.Drawing.Point(202, 59);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(100, 25);
+            this.textBox1.TabIndex = 11;
+            // 
             // Calendar
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(936, 480);
+            this.Controls.Add(this.textBox1);
             this.Controls.Add(this.BtnGoSearchSchedule);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
@@ -308,5 +317,6 @@
         private System.Windows.Forms.Label labelNowTime;
         private System.Windows.Forms.Label labelLeftTime;
         private System.Windows.Forms.Button BtnGoSearchSchedule;
+        private System.Windows.Forms.TextBox textBox1;
     }
 }
