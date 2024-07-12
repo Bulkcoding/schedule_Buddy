@@ -37,6 +37,7 @@ namespace schedule_Project
         int time = 0;
         string hours;
         string minutes;
+        private static bool isMessageBoxShown = false;                                      // 플래그 변수
 
         public Calendar(string userid_Loginuser, string username_Loginuser)
         {
@@ -311,11 +312,13 @@ namespace schedule_Project
 
                     labelLeftTime.Text = "알람까지 " + hours + " 시간 " + minutes + " 분 남았습니다.";
 
-                    textBox1.Text = dt.Rows[0]["seq"].ToString();
+                    // textBox1.Text = dt.Rows[0]["seq"].ToString();
 
-                    if (hours.Equals("0") && minutes.Equals("0"))
+                    if (hours.Equals("0") && minutes.Equals("0") && !isMessageBoxShown)
                     {
-                        AlramEvent();           // 알람이 울리는 메소드 호출
+                        isMessageBoxShown = true;
+                        AlramEvent(dt.Rows[0]["schedule_content"].ToString(), dt.Rows[0]["seq"].ToString());           // 알람이 울리는 메소드 호출
+                        isMessageBoxShown = false;
                     }
                 }
                 else
@@ -342,16 +345,16 @@ namespace schedule_Project
         }
 
         // 남은시간이 00:00이고, status가 0일때, 알람이 울리는 메소드
-        private void AlramEvent()
+        private void AlramEvent(string schedule_content, string seq)
         {
-            if (!StatusIsOne())      // status가 1이면 실행하지 않는다.
+            if (!StatusIsOne(seq))      // status가 1이면 실행하지 않는다.
             {
-                ShowMessageBox();
+                ShowMessageBox(schedule_content, seq);
             }
         }
 
         // status가 1인지 확인
-        private bool StatusIsOne()
+        private bool StatusIsOne(string seq)
         {
             using (conn = new OracleConnection(connectionString))
             {
@@ -361,7 +364,7 @@ namespace schedule_Project
 
                 OracleCommand cmd = new OracleCommand(sql, conn);
                 OracleParameter paramSeq = new OracleParameter(":seq", OracleDbType.Int32);
-                paramSeq.Value = textBox1.Text;
+                paramSeq.Value = seq;
 
                 cmd.Parameters.Add(paramSeq);
 
@@ -377,7 +380,7 @@ namespace schedule_Project
 
 
         // 알람 확인 후 status를 1로 바꿔주는 메소드
-        private void UpdateCheckStatus()
+        private void UpdateCheckStatus(string seq)
         {
             using (conn = new OracleConnection(connectionString))
             {
@@ -387,7 +390,7 @@ namespace schedule_Project
 
                 OracleCommand cmd = new OracleCommand(sql, conn);
                 OracleParameter paramSeq = new OracleParameter(":seq", OracleDbType.Int32);
-                paramSeq.Value = textBox1.Text;
+                paramSeq.Value = seq;
 
                 cmd.Parameters.Add(paramSeq);
 
@@ -396,7 +399,7 @@ namespace schedule_Project
         }
 
         // 알람이 울린지 1분이 지나면 status를 null로 바꿔주는 메소드
-        private void ResetCheckStatus()
+        private void ResetCheckStatus(string seq)
         {
             using (conn = new OracleConnection(connectionString))
             {
@@ -406,7 +409,7 @@ namespace schedule_Project
 
                 OracleCommand cmd = new OracleCommand(sql, conn);
                 OracleParameter paramSeq = new OracleParameter(":seq", OracleDbType.Int32);
-                paramSeq.Value = textBox1.Text;
+                paramSeq.Value = seq;
 
                 cmd.Parameters.Add(paramSeq);
 
@@ -415,30 +418,30 @@ namespace schedule_Project
         }
 
         // 알람 메세지 출력.  확인을 누르면 status가 1로 바뀐다.
-        private void ShowMessageBox()
+        private void ShowMessageBox(string schedule_content, string seq)
         {
-            DialogResult result = MessageBox.Show("알람 메시지", "알람", MessageBoxButtons.OKCancel);
+            DialogResult result = MessageBox.Show(schedule_content, "알람", MessageBoxButtons.OKCancel);
             if (result == DialogResult.OK || result == DialogResult.Cancel)
             {
-                UpdateCheckStatus();
+                UpdateCheckStatus(seq);
 
-                timerOneMinuteStart();
+                timerOneMinuteStart(seq);
             }
         }
 
 
         // 알람이 울린지 1분이 지나면 status를 null로 돌려주는 메소드를 호출하는 메소드
-        private void timerOneMinuteStart()
+        private void timerOneMinuteStart(string seq)
         {
-            Timer timer = new Timer();
-            timer.Interval = 60000;
-            timer.Tick += (sender, e) =>
+            Timer timerOneM = new Timer();
+            timerOneM.Interval = 60000;
+            timerOneM.Tick += (sender, e) =>
             {
-                timer.Stop();
-                ResetCheckStatus();
-                timer.Dispose();
+                timerOneM.Stop();
+                ResetCheckStatus(seq);
+                timerOneM.Dispose();
             };
-            timer.Start();
+            timerOneM.Start();
         }
 
 
