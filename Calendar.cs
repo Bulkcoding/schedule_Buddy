@@ -315,12 +315,7 @@ namespace schedule_Project
 
                     if (hours.Equals("0") && minutes.Equals("0"))
                     {
-                        // MessageBox.Show("알람이 울립니다."); 이거 1초마다 계속 뜸. 1분 정도 지나야 db에서 사라져서 이 부분은 좀 더 생각해야할듯
-                        // 진짜 알람처럼 계속 울리는데 한번끄면 아에 꺼지는 식으로 tick 함수를 1분정도 멈춰둬야하나?
-
-                        MessageBox.Show("머ㅗ임");
                         AlramEvent();           // 알람이 울리는 메소드 호출
-
                     }
                 }
                 else

@@ -173,7 +173,7 @@
             // btnSave
             // 
             this.btnSave.Font = new System.Drawing.Font("굴림", 10.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.btnSave.Location = new System.Drawing.Point(810, 39);
+            this.btnSave.Location = new System.Drawing.Point(32, 343);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(89, 30);
             this.btnSave.TabIndex = 7;
@@ -244,7 +244,7 @@
             // BtnGoSearchSchedule
             // 
             this.BtnGoSearchSchedule.Font = new System.Drawing.Font("굴림", 10.8F, System.Drawing.FontStyle.Bold);
-            this.BtnGoSearchSchedule.Location = new System.Drawing.Point(21, 425);
+            this.BtnGoSearchSchedule.Location = new System.Drawing.Point(32, 425);
             this.BtnGoSearchSchedule.Name = "BtnGoSearchSchedule";
             this.BtnGoSearchSchedule.Size = new System.Drawing.Size(115, 30);
             this.BtnGoSearchSchedule.TabIndex = 10;
@@ -254,10 +254,11 @@
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(202, 59);
+            this.textBox1.Location = new System.Drawing.Point(131, 28);
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(100, 25);
             this.textBox1.TabIndex = 11;
+            this.textBox1.Visible = false;
             // 
             // Calendar
             // 
