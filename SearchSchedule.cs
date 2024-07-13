@@ -203,8 +203,6 @@ namespace schedule_Project
 
                     sql += " WHERE seq = :seq ";
 
-                    MessageBox.Show("3번" + sql);
-
                     OracleCommand cmd = new OracleCommand(sql, conn);
 
 

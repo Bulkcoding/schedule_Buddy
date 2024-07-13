@@ -252,39 +252,50 @@ namespace schedule_Project
                 string sql = " WITH Schedule_CTE AS ( " +
                              "  SELECT " +
                              "      CASE " +
-                             "          WHEN TO_CHAR(SYSDATE, 'HH24:MI') = TO_CHAR(TO_DATE(alram_start_date || alram_time, 'YY/MM/DD HH24:MI'), 'HH24:MI') THEN 'CASE4' " +
-                             "          WHEN TO_CHAR(SYSDATE, 'YY/MM/DD HH24:MI') < TO_CHAR(TO_DATE(alram_start_date || alram_time, 'YY/MM/DD HH24:MI'), 'YY/MM/DD HH24:MI') THEN 'CASE1' " +
-                             "          WHEN TO_CHAR(SYSDATE, 'YY/MM/DD HH24:MI') BETWEEN TO_CHAR(TO_DATE(alram_start_date || alram_time, 'YY/MM/DD HH24:MI'), 'YY/MM/DD HH24:MI') AND TO_CHAR(TO_DATE(alram_end_date || alram_time, 'YY/MM/DD HH24:MI'), 'YY/MM/DD HH24:MI') THEN 'CASE2' " +
-                             "          ELSE 'CASE3' " +
-                             "      END AS result_case, " +
+                             "          WHEN TO_CHAR(SYSDATE, 'YY/MM/DD HH24:MI') <= TO_CHAR(TO_DATE(alram_start_date || alram_time, 'YY/MM/DD HH24:MI'), 'YY/MM/DD HH24:MI') THEN 'CASE1'" +
+                             "          ELSE NULL" +
+                             "      END AS result_case1," +
+                             "      CASE" +
+                             "          WHEN TO_CHAR(SYSDATE, 'YY/MM/DD HH24:MI') BETWEEN TO_CHAR(TO_DATE(alram_start_date || alram_time, 'YY/MM/DD HH24:MI'), 'YY/MM/DD HH24:MI') AND TO_CHAR(TO_DATE(alram_end_date || alram_time, 'YY/MM/DD HH24:MI'), 'YY/MM/DD HH24:MI') THEN 'CASE2'" +
+                             "          ELSE NULL" +
+                             "      END AS result_case2," +
+                             "      CASE" +
+                             "          WHEN TO_CHAR(SYSDATE, 'YY/MM/DD') = TO_CHAR(TO_DATE(alram_start_date, 'YY/MM/DD'), 'YY/MM/DD') THEN 'CASE4-1'" +
+                             "          ELSE NULL" +
+                             "      END AS result_case4_1," +
+                             "      CASE" +
+                             "          WHEN TO_CHAR(SYSDATE, 'HH24:MI') = alram_time THEN 'CASE4-2'" +
+                             "          ELSE NULL" +
+                             "      END AS result_case4_2," +
                              "      TO_CHAR(SYSDATE, 'YY/MM/DD HH24:MI') AS nowtime, " +
                              "      TO_CHAR(TO_DATE(alram_start_date || alram_time, 'YY/MM/DD HH24:MI'), 'YY/MM/DD HH24:MI') AS statime, " +
                              "      TO_CHAR(TO_DATE(alram_end_date || alram_time, 'YY/MM/DD HH24:MI'), 'YY/MM/DD HH24:MI') AS endtime, " +
                              "      alram_time, alram_start_date, schedule_content, seq " +
                              "  FROM tbl_Schedule " +
-                             "  WHERE fk_userid= :fk_userid AND alram_status = 1 AND alram_time IS NOT NULL AND check_status is null " +
+                             "  WHERE fk_userid= :fk_userid AND alram_status = 1 AND alram_time IS NOT NULL AND check_status IS NULL " +
                              " ), " +
                              " Minutes_Diff_CTE AS ( " +
                              "   SELECT " +
-                             "       CASE " +
-                             "          WHEN result_case = 'CASE4' THEN 0 " +
-                             "          WHEN result_case = 'CASE1' THEN " +
-                             "             CASE " +
-                             "                WHEN alram_time > TO_CHAR(SYSDATE, 'HH24:MI') THEN " +
-                             "                   (TO_NUMBER(TO_DATE(alram_time, 'HH24:MI') - TO_DATE(TO_CHAR(SYSDATE, 'HH24:MI'), 'HH24:MI')) * 24 * 60) + (TO_NUMBER(TO_DATE(alram_start_date) - TO_DATE(TO_CHAR(SYSDATE, 'YY/MM/DD'))) * 24 * 60) " +
-                             "               ELSE " +
-                             "                   TO_NUMBER(TO_DATE(alram_time, 'HH24:MI') - TO_DATE(TO_CHAR(SYSDATE, 'HH24:MI'), 'HH24:MI')) * 24 * 60 + (TO_NUMBER(TO_DATE(alram_start_date) - TO_DATE(TO_CHAR(SYSDATE, 'YY/MM/DD'))) * 24 * 60) " +
+                             "      CASE WHEN result_case4_1 = 'CASE4-1' and result_case4_2 = 'CASE4-2' THEN 0" +
+                             "          ELSE " +
+                             "          CASE " +
+                             "              WHEN result_case1 = 'CASE1' THEN " +
+                             "                  CASE " +
+                             "                      WHEN alram_time > TO_CHAR(SYSDATE, 'HH24:MI') THEN" +
+                             "                          (TO_NUMBER(TO_DATE(alram_time, 'HH24:MI') - TO_DATE(TO_CHAR(SYSDATE, 'HH24:MI'), 'HH24:MI')) * 24 * 60) + (TO_NUMBER(TO_DATE(alram_start_date) - TO_DATE(TO_CHAR(SYSDATE, 'YY/MM/DD'))) * 24 * 60) " +
+                             "                      ELSE " +
+                             "                          TO_NUMBER(TO_DATE(alram_time, 'HH24:MI') - TO_DATE(TO_CHAR(SYSDATE, 'HH24:MI'), 'HH24:MI')) * 24 * 60 + (TO_NUMBER(TO_DATE(alram_start_date) - TO_DATE(TO_CHAR(SYSDATE, 'YY/MM/DD'))) * 24 * 60) " +
+                             "                  END " +
+                             "              ELSE " +
+                             "                  CASE " +
+                             "                      WHEN alram_time > TO_CHAR(SYSDATE, 'HH24:MI') THEN " +
+                             "                          TO_NUMBER(TO_DATE(alram_time, 'HH24:MI') - TO_DATE(TO_CHAR(SYSDATE, 'HH24:MI'), 'HH24:MI')) * 24 * 60 " +
+                             "                      ELSE " +
+                             "                          (24 * 60) + TO_NUMBER(TO_DATE(alram_time, 'HH24:MI') - TO_DATE(TO_CHAR(SYSDATE, 'HH24:MI'), 'HH24:MI')) * 24 * 60 " +
+                             "                  END" +
                              "          END " +
-                             "     ELSE " +
-                             "        CASE " +
-                             "           WHEN alram_time > TO_CHAR(SYSDATE, 'HH24:MI') THEN " +
-                             "              TO_NUMBER(TO_DATE(alram_time, 'HH24:MI') - TO_DATE(TO_CHAR(SYSDATE, 'HH24:MI'), 'HH24:MI')) * 24 * 60 " +
-                             "         ELSE " +
-                             "            (24 * 60) + TO_NUMBER(TO_DATE(alram_time, 'HH24:MI') - TO_DATE(TO_CHAR(SYSDATE, 'HH24:MI'), 'HH24:MI')) * 24 * 60 " +
-                             "   END " +
-                             "  END AS minutes_diff, nowtime, statime, endtime, alram_time, result_case, schedule_content, seq " +
+                             "      END AS minutes_diff, nowtime, statime, endtime, alram_time, schedule_content, seq " +
                              "  FROM Schedule_CTE " +
-                             "  WHERE result_case IN ('CASE1', 'CASE2', 'CASE4') " +
                              " ) " +
                              " SELECT " +
                              "    trunc(minutes_diff / 60) AS hours, " +
@@ -293,6 +304,7 @@ namespace schedule_Project
                              " ORDER BY trunc(minutes_diff / 60), round(MOD(minutes_diff, 60)) ";
 
                 OracleCommand cmd = new OracleCommand(sql, conn);
+
                 OracleParameter paramFkUserid = new OracleParameter(":fk_userid", OracleDbType.Varchar2, 20);
                 paramFkUserid.Value = txtHiddenId.Text;
 
@@ -312,12 +324,13 @@ namespace schedule_Project
 
                     labelLeftTime.Text = "알람까지 " + hours + " 시간 " + minutes + " 분 남았습니다.";
 
-                    // textBox1.Text = dt.Rows[0]["seq"].ToString();
+                    textBox1.Text = dt.Rows[0]["seq"].ToString();
+
 
                     if (hours.Equals("0") && minutes.Equals("0") && !isMessageBoxShown)
                     {
                         isMessageBoxShown = true;
-                        AlramEvent(dt.Rows[0]["schedule_content"].ToString(), dt.Rows[0]["seq"].ToString());           // 알람이 울리는 메소드 호출
+                        AlramEvent(dt.Rows[0]["schedule_content"].ToString());           // 알람이 울리는 메소드 호출   dt.Rows[0]["seq"].ToString()
                         isMessageBoxShown = false;
                     }
                 }
@@ -345,16 +358,16 @@ namespace schedule_Project
         }
 
         // 남은시간이 00:00이고, status가 0일때, 알람이 울리는 메소드
-        private void AlramEvent(string schedule_content, string seq)
+        private void AlramEvent(string schedule_content)
         {
-            if (!StatusIsOne(seq))      // status가 1이면 실행하지 않는다.
+            if (!StatusIsOne())      // status가 1이면 실행하지 않는다.
             {
-                ShowMessageBox(schedule_content, seq);
+                ShowMessageBox(schedule_content);
             }
         }
 
         // status가 1인지 확인
-        private bool StatusIsOne(string seq)
+        private bool StatusIsOne()
         {
             using (conn = new OracleConnection(connectionString))
             {
@@ -364,7 +377,7 @@ namespace schedule_Project
 
                 OracleCommand cmd = new OracleCommand(sql, conn);
                 OracleParameter paramSeq = new OracleParameter(":seq", OracleDbType.Int32);
-                paramSeq.Value = seq;
+                paramSeq.Value = textBox1.Text;
 
                 cmd.Parameters.Add(paramSeq);
 
@@ -380,7 +393,7 @@ namespace schedule_Project
 
 
         // 알람 확인 후 status를 1로 바꿔주는 메소드
-        private void UpdateCheckStatus(string seq)
+        private void UpdateCheckStatus()
         {
             using (conn = new OracleConnection(connectionString))
             {
@@ -390,7 +403,7 @@ namespace schedule_Project
 
                 OracleCommand cmd = new OracleCommand(sql, conn);
                 OracleParameter paramSeq = new OracleParameter(":seq", OracleDbType.Int32);
-                paramSeq.Value = seq;
+                paramSeq.Value = textBox1.Text;
 
                 cmd.Parameters.Add(paramSeq);
 
@@ -399,7 +412,7 @@ namespace schedule_Project
         }
 
         // 알람이 울린지 1분이 지나면 status를 null로 바꿔주는 메소드
-        private void ResetCheckStatus(string seq)
+        private void ResetCheckStatus()
         {
             using (conn = new OracleConnection(connectionString))
             {
@@ -409,7 +422,7 @@ namespace schedule_Project
 
                 OracleCommand cmd = new OracleCommand(sql, conn);
                 OracleParameter paramSeq = new OracleParameter(":seq", OracleDbType.Int32);
-                paramSeq.Value = seq;
+                paramSeq.Value = textBox1.Text;
 
                 cmd.Parameters.Add(paramSeq);
 
@@ -418,27 +431,27 @@ namespace schedule_Project
         }
 
         // 알람 메세지 출력.  확인을 누르면 status가 1로 바뀐다.
-        private void ShowMessageBox(string schedule_content, string seq)
+        private void ShowMessageBox(string schedule_content)
         {
             DialogResult result = MessageBox.Show(schedule_content, "알람", MessageBoxButtons.OKCancel);
             if (result == DialogResult.OK || result == DialogResult.Cancel)
             {
-                UpdateCheckStatus(seq);
+                UpdateCheckStatus();
 
-                timerOneMinuteStart(seq);
+                timerOneMinuteStart();
             }
         }
 
 
         // 알람이 울린지 1분이 지나면 status를 null로 돌려주는 메소드를 호출하는 메소드
-        private void timerOneMinuteStart(string seq)
+        private void timerOneMinuteStart()
         {
             Timer timerOneM = new Timer();
             timerOneM.Interval = 60000;
             timerOneM.Tick += (sender, e) =>
             {
                 timerOneM.Stop();
-                ResetCheckStatus(seq);
+                ResetCheckStatus();
                 timerOneM.Dispose();
             };
             timerOneM.Start();
